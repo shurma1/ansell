@@ -1,0 +1,18 @@
+body, input{
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+
+h2{
+    font-size: 25pt;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 40px;
+}
+
+p{
+    font-weight: 400;
+}
+:root{
+    --acent-color: #1A65B7;
+    --acent-color-hover: #366da8;
+}

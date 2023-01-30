@@ -1,0 +1,27 @@
+@media screen and (max-width: 800px) {
+    .reports h2 {
+        width: 80%;
+        font-size: 18pt;
+    }
+    .reports p {
+        width: 80%;
+    }
+    .reports{
+        height: 100vh;
+    }
+  }
+
+
+  @media screen and (max-width: 500px) {
+    .tabs button {
+        margin: 0 ;
+        margin-right: 5px;
+        padding: 10px 5px;
+    }
+    .conteiner {
+        width: 90%;
+    }
+    h2{
+        font-size: 17pt;
+    }
+  }
