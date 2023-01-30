@@ -570,5 +570,5 @@ def index():
 
 
 if __name__ == '__main__':
-	http_server = WSGIServer(('host', 5500), app)
+	http_server = WSGIServer((host, 5500), app)
 	http_server.serve_forever()
