@@ -1,4 +1,5 @@
 const anim = lottie;
+let chart_data
 function lottieAccessError(){
   anim.loadAnimation({
       container: document.querySelector('.lottie_container'),
@@ -688,7 +689,51 @@ return defect
 
 
 
+function render_chart_data(data, date){
+  defect_list = [{"round": 1, "rejects":[]}, {"round": 2, "rejects":[]}, {"round": 3, "rejects":[]}, {"round": 4, "rejects":[]}, {"round": 5, "rejects":[]},{"round": 6, "rejects":[]}, {"round": 7, "rejects":[]}]
+  let newData = Object.keys(data.data).map((key) => [Number(key), data.data[key]]);
+  let defects = Object.keys(data.defects).map((key) => [Number(key), data.defects[key]]);
+  defects.forEach(defect =>{
+    defect = defect[1]
+    for(i=0; i<7; i++){
+      defect_list[i].rejects.push({
+        name:defect[0],
+        id:defect[1],
+        count: 0
+      })
+    
+    }
+  })
 
+  newData.forEach(item =>{
+    item = item[1]
+    if(item['date'] == date){
+      defect_list.forEach(n =>{
+        n.rejects.forEach(x =>{
+          if(x['id'] == item['rejectType'] && n.round == item['round']){
+            x['count']+=item['count']
+          }
+        })
+      })
+    }
+  })
+
+  let datas = []
+  let labels = []
+  defect_list.forEach(item =>{
+    labels = [item.rejects[0]['name'], item.rejects[1]['name'], item.rejects[2]['name'], item.rejects[3]['name'], item.rejects[4]['name'], item.rejects[5]['name'], item.rejects[6]['name'], item.rejects[7]['name'], item.rejects[8]['name'], item.rejects[9]['name'], item.rejects[10]['name'], item.rejects[11]['name']]
+
+    data ={
+        label: 'Round №'+item['round'],
+        data: [item.rejects[0]['count'], item.rejects[1]['count'], item.rejects[2]['count'], item.rejects[3]['count'], item.rejects[4]['count'], item.rejects[5]['count'], item.rejects[6]['count'], item.rejects[7]['count'], item.rejects[8]['count'], item.rejects[9]['count'], item.rejects[10]['count'], item.rejects[11]['count']],
+        borderWidth: 1
+    }
+    datas.push(data)
+  })
+
+return {datas, labels}
+
+}
 
 
 
@@ -707,6 +752,8 @@ function render_reports(reports){
     h2.innerHTML = 'Количество дефектов за цикл'
     p.innerHTML = 'На этом графике показано количество дефектов за раунд.'
 
+
+
     data = JSON.stringify({
       token: sessionStorage['token']
     })
@@ -719,47 +766,15 @@ function render_reports(reports){
       contentType: "application/json; charset=utf-8",
       data: data,
       success: function(data){
-        defect_list = [{"round": 1, "rejects":[]}, {"round": 2, "rejects":[]}, {"round": 3, "rejects":[]}, {"round": 4, "rejects":[]}, {"round": 5, "rejects":[]},{"round": 6, "rejects":[]}, {"round": 7, "rejects":[]}]
-        let newData = Object.keys(data.data).map((key) => [Number(key), data.data[key]]);
-        let defects = Object.keys(data.defects).map((key) => [Number(key), data.defects[key]]);
-        defects.forEach(defect =>{
-          defect = defect[1]
-          for(i=0; i<7; i++){
-            defect_list[i].rejects.push({
-              name:defect[0],
-              id:defect[1],
-              count: 0
-            })
-          
-          }
-        })
+        chart_data = data
+        
+      }
+  });
 
-        newData.forEach(item =>{
-          item = item[1]
-          defect_list.forEach(n =>{
-            n.rejects.forEach(x =>{
-              if(x['id'] == item['rejectType'] && n.round == item['round']){
-                x['count']+=item['count']
-              }
-            })
-          })
-        })
+  let {datas, labels} = render_chart_data(chart_data , moment().format('DD.MM.YYYY'))
+  const ctx = document.getElementById('chart');
 
-        let datas = []
-        let labels = []
-        defect_list.forEach(item =>{
-          labels = [item.rejects[0]['name'], item.rejects[1]['name'], item.rejects[2]['name'], item.rejects[3]['name'], item.rejects[4]['name'], item.rejects[5]['name'], item.rejects[6]['name'], item.rejects[7]['name'], item.rejects[8]['name'], item.rejects[9]['name'], item.rejects[10]['name'], item.rejects[11]['name']]
-  
-          data ={
-              label: 'Round №'+item['round'],
-              data: [item.rejects[0]['count'], item.rejects[1]['count'], item.rejects[2]['count'], item.rejects[3]['count'], item.rejects[4]['count'], item.rejects[5]['count'], item.rejects[6]['count'], item.rejects[7]['count'], item.rejects[8]['count'], item.rejects[9]['count'], item.rejects[10]['count'], item.rejects[11]['count']],
-              borderWidth: 1
-          }
-          datas.push(data)
-        })
-        const ctx = document.getElementById('chart');
-
-        new Chart(ctx, {
+      let chart =  new Chart(ctx, {
           type: 'bar',
           responsive: false,
           data: {
@@ -776,9 +791,6 @@ function render_reports(reports){
             }
           }
         });
-      }
-  });
-
 
 
   let nav = document.querySelectorAll('.tabs button')
@@ -831,6 +843,22 @@ function render_reports(reports){
         }
     });
     }
+
+    $('input[name="date"]').daterangepicker({
+      singleDatePicker: true,
+      showDropdowns: true,
+      minYear: 2022,
+      locale: {
+        format: 'DD.MM.Y' 
+    },
+      maxYear: parseInt(moment().format('YYYY'),10)
+    }, function(start, end, label) {
+      let {datas, labels} = render_chart_data(chart_data , moment(start).format('DD.MM.YYYY'))
+      chart.data.labels = labels
+      chart.data.datasets = datas
+      chart.update()
+    });
+
 }
 
 function create_reports(){
@@ -844,7 +872,7 @@ function create_reports(){
     
     let setting_button = document.createElement('button')
     setting_button.className = 'settings'
-    setting_button.innerHTML = '<svg class="setting__asset" width="25" height="27" viewBox="0 0 25 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.4367 0.000472558C14.1603 -0.0126825 14.8456 0.249103 15.3574 0.75031C15.8717 1.23573 16.1467 1.90795 16.1467 2.61832C16.1467 4.06538 17.3438 5.23749 18.8316 5.23749C19.2907 5.23749 19.7511 5.10463 20.1603 4.88099C21.435 4.19561 23.0267 4.63105 23.7503 5.85446L24.6461 7.3936C24.8698 7.78825 25 8.23553 25 8.69595C25 9.62996 24.4883 10.4995 23.6595 10.9586C23.2504 11.1823 22.9084 11.5243 22.6729 11.9203C21.9743 13.1555 22.4098 14.7196 23.6595 15.4326C24.9211 16.1549 25.3552 17.7348 24.6461 18.9832L23.7503 20.471C23.2767 21.2853 22.3953 21.7865 21.4481 21.7865C20.9746 21.7865 20.501 21.6668 20.1076 21.43C19.6854 21.2064 19.2263 21.0748 18.7645 21.0748C18.0541 21.0748 17.3701 21.3524 16.8715 21.851C16.3571 22.339 16.0809 23.0086 16.0809 23.7058C16.0809 25.1397 14.8851 26.3105 13.3973 26.3105H11.5963C10.8846 26.3105 10.2137 26.0211 9.727 25.5344C9.22711 25.0345 8.96533 24.3768 8.96533 23.6927C8.96533 22.2456 7.78006 21.0748 6.29485 21.0748C5.8068 21.0748 5.33322 21.2064 4.92542 21.4577C4.30713 21.7984 3.57045 21.8905 2.88638 21.7194C2.20232 21.5353 1.61035 21.088 1.25516 20.496L0.414553 19.0095C0.0185865 18.3925 -0.0998088 17.6545 0.0856772 16.9573C0.268532 16.2601 0.743429 15.6681 1.38671 15.3129C1.79583 15.0893 2.13655 14.7604 2.37334 14.3526C3.05872 13.116 2.62328 11.5638 1.38671 10.8402C0.136982 10.1299 -0.297134 8.5644 0.414553 7.32783L1.25516 5.85446C1.61035 5.23749 2.20232 4.78891 2.89954 4.60474C3.59807 4.42057 4.33344 4.52449 4.95173 4.88099C5.37269 5.10463 5.83311 5.22302 6.29485 5.22302C7.00523 5.22302 7.68797 4.94677 8.18786 4.46003C8.68776 3.97329 8.96533 3.30239 8.96533 2.61832C8.96533 1.17127 10.1611 0.000472558 11.6476 0.000472558H13.4367ZM13.9642 9.84176C12.583 9.27477 10.9899 9.57734 9.92433 10.6166C8.87193 11.6427 8.54305 13.2081 9.12187 14.5513C9.68885 15.9049 11.0294 16.7863 12.529 16.7863H12.5435C13.5301 16.7995 14.451 16.4193 15.1469 15.7339C15.8441 15.063 16.2387 14.1421 16.2387 13.1818C16.2519 11.7216 15.3442 10.393 13.9642 9.84176Z" fill="#D0D0D3"/></svg> '
+    setting_button.innerHTML = '<input type="text" name="date" value="" />'
 
     reports__title.append(h2, setting_button)
 
