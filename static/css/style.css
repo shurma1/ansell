@@ -583,3 +583,17 @@ button.download__button svg{
     background-color: #ff5353;
     margin-top: 10px;
 }
+
+
+.settings input {
+    border: none;
+    box-shadow: 0 0 7px 0 #d0d0d3;
+    border-radius: 5px;
+    box-sizing: border-box;
+    padding: 5px 10px;
+    width: 90px;
+    text-align: center;
+    color: #5c7383;
+    outline: none;
+}
+
