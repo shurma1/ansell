@@ -340,7 +340,7 @@ def get_table():
 
 
 
-@app.route('/get_users', methods=['POST']) #without tokken>>>>>>>>>>>>>>>>>>
+@app.route('/get_users', methods=['POST'])
 def get_users():
 	contents = request.get_json(force=True)
 	token = contents['token']
@@ -390,7 +390,7 @@ def get_users():
 
 
 
-@app.route('/edit_user', methods=['POST']) #without tokken>>>>>>>>>>>>>>>>>>
+@app.route('/edit_user', methods=['POST']) 
 def edit_user():
 	contents = request.get_json(force=True)
 	token = contents['token']
@@ -570,6 +570,5 @@ def index():
 
 
 if __name__ == '__main__':
-	#app.run(host, 5500)
-	http_server = WSGIServer(('localhost', 5500), app)
+	http_server = WSGIServer(('host', 5500), app)
 	http_server.serve_forever()
