@@ -65,7 +65,7 @@ def worker_auth():
 	if(result):
 		hand = db.get_hand(login, hashPassword)
 		defects = db.get_this_defects()
-		token = jwt.encode({"r": randint(1, 1000000)}, "secret", algorithm="HS256")
+		token = jwt.encode({"r": randint(1, 1000000)}, "secret", algorithm="HS256").decode('utf-8')
 		data = {
 			'token': token,
 			'login': login,
@@ -102,7 +102,8 @@ def auth():
 	result = db.check_meneger(login, hashPassword)
 	if(result):
 		userStatus = db.get_user_status(login, hashPassword)[0]
-		token = jwt.encode({"r": randint(1, 1000000)}, "secret", algorithm="HS256")
+		print(userStatus)
+		token = jwt.encode({"r": randint(1, 1000000)}, "secret", algorithm="HS256").decode('utf-8')
 		data = {
 			'token': token,
 			'login': login,
